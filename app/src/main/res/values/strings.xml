@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">BestTrip</string>
+    <string name="best_trip_with_us">Best trip with us</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign up</string>
+</resources>

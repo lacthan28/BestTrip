@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "927883339965",
+    "firebase_url": "https://besttrip-19093.firebaseio.com",
+    "project_id": "besttrip-19093",
+    "storage_bucket": "besttrip-19093.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927883339965:android:0109c7e70de0ccc8",
+        "android_client_info": {
+          "package_name": "sg.vinova.besttrip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "927883339965-6malo1iq2fakg6mva0fkqbasr9n139tt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sg.vinova.besttrip",
+            "certificate_hash": "5c89c30f3726c192c8cb0c2f1a5a617ad536529a"
+          }
+        },
+        {
+          "client_id": "927883339965-sbb20301vp2e08dn3cfrasicef8f82b7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsxtGbuJyHVUq87edPZqR31aYgQPN8VwA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "927883339965-sbb20301vp2e08dn3cfrasicef8f82b7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
