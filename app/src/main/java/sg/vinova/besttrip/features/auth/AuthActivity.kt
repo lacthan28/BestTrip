@@ -1,5 +1,6 @@
 package sg.vinova.besttrip.features.auth
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintSet
@@ -8,13 +9,12 @@ import android.support.constraint.ConstraintSet.TOP
 import android.support.v7.app.AppCompatActivity
 import android.transition.AutoTransition
 import android.transition.TransitionManager
-import android.view.Window
 import kotlinx.android.synthetic.main.activity_auth.*
 import org.jetbrains.anko.dip
+import org.jetbrains.anko.toast
+import sg.vinova.besttrip.ACTIVITY_FORGOT
 import sg.vinova.besttrip.R
-import sg.vinova.besttrip.extensions.delay
-import sg.vinova.besttrip.extensions.isLogin
-import sg.vinova.besttrip.extensions.startActivityWithAnim
+import sg.vinova.besttrip.extensions.*
 import sg.vinova.besttrip.features.auth.forgot.ForgotActivity
 import sg.vinova.besttrip.features.home.LandingActivity
 
@@ -42,6 +42,11 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun setOnClickListener() {
+        edtPassword2.afterTextChange {
+            if (it.isNotEmpty() && it != edtPassword.text.toString())
+                edtPassword2.error = "Your passwords don't match. Please retype your password to confirm it."
+        }
+
         tvSignUp.setOnClickListener {
             prepaidSignUpView()
         }
@@ -52,8 +57,34 @@ class AuthActivity : AppCompatActivity() {
             startActivityWithAnim<LandingActivity>()
         }
         tvForgot.setOnClickListener {
-            startActivityWithAnim<ForgotActivity>(isFinish = false)
+            startActivityWithAnimForResult<ForgotActivity>(requestCode = ACTIVITY_FORGOT, isFinish = false)
         }
+        btnEmailLogin.setOnClickListener {
+            if (btnEmailLogin.text.contains("Login")) {
+                if (checkData(email = edtEmail.text.toString(), password = edtPassword.text.toString())) {
+                    toast("login")
+                    //todo(Call api to login)
+                }
+            } else {
+                if (checkData(username = edtUsername.text.toString(), email = edtEmail.text.toString(),
+                                password = edtPassword.text.toString(), confirmPassword = edtPassword2.text.toString())) {
+                    toast("sign up")
+                    //todo(Call api to sign up)
+                }
+            }
+        }
+    }
+
+    private fun checkData(username: String? = null, email: String, password: String, confirmPassword: String? = null): Boolean {
+        if (username != null) {
+            //todo(check data)
+        }
+        return false
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == ACTIVITY_FORGOT)
+            edtEmail.setText(data?.getStringExtra("email") ?: "")
     }
 
     private fun prepaidLogoAnimations() {
@@ -97,6 +128,8 @@ class AuthActivity : AppCompatActivity() {
 
                 btnEmailLogin.text = getString(R.string.login_with_email)
 
+                edtPassword.setText("")
+
                 TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
                     duration = 500
                 })
@@ -133,6 +166,10 @@ class AuthActivity : AppCompatActivity() {
                 edtPassword.setBackgroundColor(Color.WHITE)
 
                 btnEmailLogin.text = getString(R.string.sign_up_with_email)
+
+                edtUsername.setText("")
+                edtPassword.setText("")
+                edtPassword2.setText("")
 
                 TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
                     duration = 500

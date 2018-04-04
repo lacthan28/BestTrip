@@ -56,11 +56,13 @@
         android:hint="@string/email_address"
         android:inputType="textEmailAddress"
         android:padding="10dp"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintEnd_toStartOf="@id/glRight"
         app:layout_constraintStart_toEndOf="@id/glLeft"
         app:layout_constraintTop_toBottomOf="@id/tvDes" />
 
     <TextView
+        android:id="@+id/tvSendForgot"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16sp"
