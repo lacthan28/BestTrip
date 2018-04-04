@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".features.auth.forgot.ForgotActivity">
+
+    <!-- Vertical guideline -->
+
+    <android.support.constraint.Guideline
+        android:id="@+id/glLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/glRight"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <!-- Horizontal guideline -->
+
+    <android.support.constraint.Guideline
+        android:id="@+id/glTop"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <!-- View -->
+
+    <TextView
+        android:id="@+id/tvDes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_your_email_address_to_reset_password"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintEnd_toStartOf="@id/glRight"
+        app:layout_constraintStart_toEndOf="@id/glLeft"
+        app:layout_constraintTop_toBottomOf="@id/glTop" />
+
+    <EditText
+        android:id="@+id/edtForgotEmail"
+        android:layout_width="0dp"
+        android:layout_height="?android:actionBarSize"
+        android:layout_margin="10dp"
+        android:background="@drawable/bg_white_radius"
+        android:drawablePadding="16dp"
+        android:drawableStart="@drawable/googleg_disabled_color_18"
+        android:elevation="2dp"
+        android:hint="@string/email_address"
+        android:inputType="textEmailAddress"
+        android:padding="10dp"
+        app:layout_constraintEnd_toStartOf="@id/glRight"
+        app:layout_constraintStart_toEndOf="@id/glLeft"
+        app:layout_constraintTop_toBottomOf="@id/tvDes" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16sp"
+        android:background="@drawable/bg_dark_radius"
+        android:elevation="2dp"
+        android:padding="16sp"
+        android:text="@string/send_instruction"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toStartOf="@id/glRight"
+        app:layout_constraintStart_toEndOf="@id/glLeft"
+        app:layout_constraintTop_toBottomOf="@id/edtForgotEmail" />
+
+</android.support.constraint.ConstraintLayout>

@@ -3,4 +3,16 @@
     <string name="best_trip_with_us">Best trip with us</string>
     <string name="login">Login</string>
     <string name="sign_up">Sign up</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="re_enter_password">Re-enter Password</string>
+    <string name="login_with_email">Login with email</string>
+    <string name="sign_up_with_email">Sign up with email</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="skip">Skip</string>
+    <string name="forgot_password_2">Forgot Password</string>
+    <string name="enter_your_email_address_to_reset_password">Enter your email address to reset password</string>
+    <string name="email_address">Email Address</string>
+    <string name="send_instruction">Send Instruction</string>
 </resources>
