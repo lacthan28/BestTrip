@@ -30,4 +30,10 @@
         <item name="android:fontFamily">@font/ubuntu_bold</item>
         <item name="android:textSize">18sp</item>
     </style>
+
+    <style name="ExitDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:colorAccent">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
+    </style>
 </resources>

@@ -2,37 +2,40 @@ package sg.vinova.besttrip.extensions
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.EditText
 
 fun EditText.afterTextChange(init: (String) -> Unit) {
-    addTextChangedListener(object : TextWatcher {
-        override fun afterTextChanged(s: Editable?) {
-            init(s?.toString() ?: "")
-        }
+    if (visibility == View.VISIBLE)
+        addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                init(s?.toString() ?: "")
+            }
 
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
-        }
+            }
 
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
-        }
+            }
 
-    })
+        })
 }
 
 fun EditText.onTextChange(init: (String) -> Unit) {
-    addTextChangedListener(object : TextWatcher {
-        override fun afterTextChanged(s: Editable?) {
-        }
+    if (visibility == View.VISIBLE)
+        addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+            }
 
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
-        }
+            }
 
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            init(s?.toString() ?: "")
-        }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                init(s?.toString() ?: "")
+            }
 
-    })
+        })
 }

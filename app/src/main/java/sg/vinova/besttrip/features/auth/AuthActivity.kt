@@ -1,6 +1,7 @@
 package sg.vinova.besttrip.features.auth
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintSet
@@ -13,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_auth.*
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.toast
 import sg.vinova.besttrip.ACTIVITY_FORGOT
+import sg.vinova.besttrip.LoginState
 import sg.vinova.besttrip.R
 import sg.vinova.besttrip.extensions.*
 import sg.vinova.besttrip.features.auth.forgot.ForgotActivity
@@ -30,18 +32,50 @@ class AuthActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_auth)
-    }
+        hideSoftKeyboard()
 
-    override fun onResume() {
-        super.onResume()
         prepaidLogoAnimations()
 
-        prepaidLoginView()
+        when (savedInstanceState?.get("menuState")) {
+            LoginState.Login -> {
+                prepaidLoginView()
+                edtEmail.setText(savedInstanceState.getString("email"))
+            }
+            LoginState.SignUp -> {
+                prepaidSignUpView()
+                edtUsername.setText(savedInstanceState.getString("username"))
+                edtEmail.setText(savedInstanceState.getString("email"))
+            }
+            else -> prepaidLoginView()
+        }
 
         setOnClickListener()
     }
 
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        outState?.apply {
+            putSerializable("menuState", if (!tvLogin.isClickable) LoginState.Login else LoginState.SignUp)
+            if (edtUsername.isVisible()) putString("username", edtUsername.text.toString())
+            putString("email", edtEmail.text.toString())
+        }
+    }
+
+    override fun onBackPressed() {
+        if (isTaskRoot) showExitDialog()
+        else super.onBackPressed()
+    }
+
     private fun setOnClickListener() {
+        edtPassword.afterTextChange {
+            if (it.length in 1..6) edtPassword.error = "Your password should have 6 characters or longer."
+            if (it.isNotEmpty() && (it.contains(edtUsername.text)
+                            || edtUsername.text.contains(it)
+                            || edtEmail.text.contains(it)))
+                edtPassword.error = "Your password can not be the same as username or email. Please choose a different password."
+        }
+
         edtPassword2.afterTextChange {
             if (it.isNotEmpty() && it != edtPassword.text.toString())
                 edtPassword2.error = "Your passwords don't match. Please retype your password to confirm it."
@@ -49,6 +83,7 @@ class AuthActivity : AppCompatActivity() {
 
         tvSignUp.setOnClickListener {
             prepaidSignUpView()
+            edtUsername.setText("")
         }
         tvLogin.setOnClickListener {
             prepaidLoginView()
@@ -61,12 +96,12 @@ class AuthActivity : AppCompatActivity() {
         }
         btnEmailLogin.setOnClickListener {
             if (btnEmailLogin.text.contains("Login")) {
-                if (checkData(email = edtEmail.text.toString(), password = edtPassword.text.toString())) {
+                if (isValidData(email = edtEmail.text.toString(), password = edtPassword.text.toString())) {
                     toast("login")
                     //todo(Call api to login)
                 }
             } else {
-                if (checkData(username = edtUsername.text.toString(), email = edtEmail.text.toString(),
+                if (isValidData(username = edtUsername.text.toString(), email = edtEmail.text.toString(),
                                 password = edtPassword.text.toString(), confirmPassword = edtPassword2.text.toString())) {
                     toast("sign up")
                     //todo(Call api to sign up)
@@ -75,11 +110,30 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkData(username: String? = null, email: String, password: String, confirmPassword: String? = null): Boolean {
-        if (username != null) {
-            //todo(check data)
+    private fun isValidData(username: String? = null, email: String, password: String, confirmPassword: String? = null): Boolean {
+        if (username.isNotNullAndIsEmpty()) {
+            edtUsername.error = "Username is empty"
+            return false
         }
-        return false
+
+        if (email.isEmpty()) {
+            edtEmail.error = "Email is empty"
+            return false
+        } else if (email.invalidEmail()) {
+            edtEmail.error = "Your email is not in the correct format"
+            return false
+        }
+
+        if (password.isEmpty()) {
+            edtPassword.error = "Password is empty"
+            return false
+        }
+
+        if (confirmPassword.isNotNullAndIsEmpty()) {
+            edtPassword2.error = "Your confirm password is empty"
+            return false
+        }
+        return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -91,7 +145,9 @@ class AuthActivity : AppCompatActivity() {
         clContainer.post {
             ConstraintSet().apply {
                 clone(clContainer)
-                setGuidelinePercent(R.id.guideline, 0.15f)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    setGuidelinePercent(R.id.guideline, 0.05f)
+                else setGuidelinePercent(R.id.guideline, 0.15f)
                 TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
                     duration = 1000
                 })
@@ -115,26 +171,24 @@ class AuthActivity : AppCompatActivity() {
                 groupShow.referencedIds = intArrayOf(R.id.background, R.id.tvLogin, R.id.tvSignUp, R.id.tvForgot,
                         R.id.edtEmail, R.id.line1, R.id.edtPassword, R.id.btnFbLogin, R.id.btnEmailLogin, R.id.tvSkip)
 
-                tvLogin.isClickable = false
-                tvLogin.setTextColor(Color.WHITE)
-                tvLogin.alpha = 1f
-
-                tvSignUp.isClickable = true
-                tvSignUp.setTextColor(Color.DKGRAY)
-                tvSignUp.alpha = 0.7f
-
-                edtEmail.setBackgroundResource(R.drawable.bg_white_radius_top)
-                edtPassword.setBackgroundResource(R.drawable.bg_white_radius_bottom)
-
-                btnEmailLogin.text = getString(R.string.login_with_email)
-
-                edtPassword.setText("")
-
                 TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
                     duration = 500
                 })
                 applyTo(clContainer)
             }
+
+            tvLogin.isClickable = false
+            tvLogin.setTextColor(Color.WHITE)
+
+            tvSignUp.isClickable = true
+            tvSignUp.setTextColor(Color.DKGRAY)
+
+            edtEmail.setBackgroundResource(R.drawable.bg_white_radius_top)
+            edtPassword.setBackgroundResource(R.drawable.bg_white_radius_bottom)
+
+            btnEmailLogin.text = getString(R.string.login_with_email)
+
+            edtPassword.setText("")
         }
     }
 
@@ -154,28 +208,24 @@ class AuthActivity : AppCompatActivity() {
                         R.id.edtEmail, R.id.line1, R.id.edtPassword, R.id.edtUsername, R.id.line,
                         R.id.line2, R.id.edtPassword2, R.id.btnFbLogin, R.id.btnEmailLogin, R.id.tvSkip)
 
-                tvSignUp.isClickable = false
-                tvSignUp.setTextColor(Color.WHITE)
-                tvSignUp.alpha = 1f
-
-                tvLogin.isClickable = true
-                tvLogin.setTextColor(Color.DKGRAY)
-                tvLogin.alpha = 0.7f
-
-                edtEmail.setBackgroundColor(Color.WHITE)
-                edtPassword.setBackgroundColor(Color.WHITE)
-
-                btnEmailLogin.text = getString(R.string.sign_up_with_email)
-
-                edtUsername.setText("")
-                edtPassword.setText("")
-                edtPassword2.setText("")
-
                 TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
                     duration = 500
                 })
                 applyTo(clContainer)
             }
+            tvSignUp.isClickable = false
+            tvSignUp.setTextColor(Color.WHITE)
+
+            tvLogin.isClickable = true
+            tvLogin.setTextColor(Color.DKGRAY)
+
+            edtEmail.setBackgroundColor(Color.WHITE)
+            edtPassword.setBackgroundColor(Color.WHITE)
+
+            btnEmailLogin.text = getString(R.string.sign_up_with_email)
+
+            edtPassword.setText("")
+            edtPassword2.setText("")
         }
     }
 }

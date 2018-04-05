@@ -15,4 +15,6 @@
     <string name="enter_your_email_address_to_reset_password">Enter your email address to reset password</string>
     <string name="email_address">Email Address</string>
     <string name="send_instruction">Send Instruction</string>
+    <string name="your_departure">Your Departure</string>
+    <string name="where_you_heading">Where you heading?</string>
 </resources>
