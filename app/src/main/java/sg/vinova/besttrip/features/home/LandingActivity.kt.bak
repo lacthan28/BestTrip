@@ -1,0 +1,53 @@
+package sg.vinova.besttrip.features.home
+
+import android.content.res.Configuration
+import android.os.Bundle
+import android.os.Handler
+import android.support.constraint.ConstraintSet
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import kotlinx.android.synthetic.main.activity_landing.*
+import org.jetbrains.anko.act
+import sg.vinova.besttrip.R
+import sg.vinova.besttrip.extensions.hideLoading
+import sg.vinova.besttrip.extensions.showExitDialog
+import sg.vinova.besttrip.extensions.showLoading
+
+class LandingActivity : AppCompatActivity() {
+    var abc = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_landing)
+        Thread({
+            Thread.sleep(1000)
+            abc = 1
+        }
+        ).start()
+        Handler().postDelayed({
+            Log.d("LandingActivity", abc.toString())
+        },10000)
+
+        clContainer.post {
+            ConstraintSet().apply {
+                clone(clContainer)
+                setGuidelinePercent(R.id.glTop, if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 0.2f else 0.3f)
+                applyTo(clContainer)
+            }
+        }
+    }
+
+    override fun onBackPressed() {
+        if (isTaskRoot) showExitDialog()
+        else super.onBackPressed()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        showLoading()
+        Handler().postDelayed({
+            hideLoading()
+        },1000)
+    }
+}

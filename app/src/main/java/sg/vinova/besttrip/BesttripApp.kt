@@ -1,7 +1,6 @@
 package sg.vinova.besttrip
 
 import android.app.Application
-import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import sg.vinova.besttrip.extensions.getUser
 import sg.vinova.besttrip.models.User

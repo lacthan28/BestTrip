@@ -21,11 +21,6 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.EditText" parent="Widget.AppCompat.EditText">
-        <item name="android:textColor">@color/colorPrimary</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
     <style name="AppTheme.TitleTextStyle" parent="TextAppearance.AppCompat.Title">
         <item name="android:fontFamily">@font/ubuntu_bold</item>
         <item name="android:textSize">18sp</item>

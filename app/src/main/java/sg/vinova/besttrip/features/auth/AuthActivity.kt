@@ -54,7 +54,6 @@ class AuthActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-
         outState?.apply {
             putSerializable("menuState", if (!tvLogin.isClickable) LoginState.Login else LoginState.SignUp)
             if (edtUsername.isVisible()) putString("username", edtUsername.text.toString())
@@ -63,8 +62,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (isTaskRoot) showExitDialog()
-        else super.onBackPressed()
+        if (isTaskRoot) showExitDialog() else super.onBackPressed()
     }
 
     private fun setOnClickListener() {
@@ -146,10 +144,10 @@ class AuthActivity : AppCompatActivity() {
             ConstraintSet().apply {
                 clone(clContainer)
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    setGuidelinePercent(R.id.guideline, 0.05f)
-                else setGuidelinePercent(R.id.guideline, 0.15f)
+                    setGuidelinePercent(R.id.glTop, 0.05f)
+                else setGuidelinePercent(R.id.glTop, 0.15f)
                 TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
-                    duration = 1000
+                    duration = 1500
                 })
                 applyTo(clContainer)
             }

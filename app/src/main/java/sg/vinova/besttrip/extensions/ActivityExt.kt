@@ -9,6 +9,9 @@ import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.startActivityForResult
 import sg.vinova.besttrip.BesttripApp
 import sg.vinova.besttrip.R
+import sg.vinova.besttrip.models.ProgressDialogFragment
+
+const val LOADING_TAG = "ProgressDialogFragment"
 
 
 inline fun <reified T : Activity> T.isLogin() = BesttripApp.instance.currentUser != null
@@ -54,3 +57,11 @@ fun Activity.showExitDialog() {
 }
 
 inline fun <reified T : Activity> T.getColorCompat(idRes: Int) = ContextCompat.getColor(this, idRes)
+
+inline fun <reified T : Activity> T.showLoading() {
+    ProgressDialogFragment.show(fragmentManager)
+}
+
+inline fun <reified T : Activity> T.hideLoading() {
+    ProgressDialogFragment.hide(fragmentManager)
+}
