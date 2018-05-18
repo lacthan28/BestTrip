@@ -20,15 +20,14 @@ abstract class AppModule {
     @Module
     companion object {
         @Provides
-        fun provideMainHandler() = Handler(Looper.getMainLooper())
+        fun provideMainHandler(): Handler = Handler(Looper.getMainLooper())
+
+        @Provides
+        fun provideFirebaseAuthInstance(): FirebaseAuth = FirebaseAuth.getInstance()
 
         @Provides
         @Singleton
-        fun provideFirebaseAuthInstance() = FirebaseAuth.getInstance()
-
-        @Provides
-        @Singleton
-        fun provideGGClient(app: BesttripApp) = GoogleApiClient.Builder(app)
+        fun provideGGClient(app: BesttripApp): GoogleApiClient = GoogleApiClient.Builder(app)
                 .addApi(LocationServices.API)
                 .build()
     }

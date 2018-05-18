@@ -1,5 +1,9 @@
 package sg.vinova.besttrip.features.auth
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -19,14 +23,18 @@ import sg.vinova.besttrip.R
 import sg.vinova.besttrip.extensions.*
 import sg.vinova.besttrip.features.auth.forgot.ForgotActivity
 import sg.vinova.besttrip.features.home.LandingActivity
+import sg.vinova.besttrip.repositories.AuthRepositoryImpl
 
 
 class AuthActivity : DaggerAppCompatActivity() {
+    private val authViewModel: AuthViewModel by lazy { providerAuthViewModel() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isLogin()) {
-            //Todo(Login to account to firebase - logic)
-            delay(2000, {
+            authViewModel.setUser(getUser())
+            authViewModel.result.observe(this, Observer {
+                if (it == null) return@Observer
                 startActivityWithAnim<LandingActivity>()
             })
         }
@@ -226,4 +234,13 @@ class AuthActivity : DaggerAppCompatActivity() {
             edtPassword2.setText("")
         }
     }
+
+    private fun providerAuthViewModel(): AuthViewModel =
+            ViewModelProviders.of(this@AuthActivity, object : ViewModelProvider.Factory {
+                override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                    val repo = AuthRepositoryImpl()
+                    @Suppress("UNCHECKED_CAST")
+                    return AuthViewModel(repo) as T
+                }
+            })[AuthViewModel::class.java]
 }
