@@ -2,31 +2,20 @@ package sg.vinova.besttrip.features.home
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Handler
 import android.support.constraint.ConstraintSet
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_landing.*
-import org.jetbrains.anko.act
 import sg.vinova.besttrip.R
+import sg.vinova.besttrip.extensions.delay
 import sg.vinova.besttrip.extensions.hideLoading
 import sg.vinova.besttrip.extensions.showExitDialog
 import sg.vinova.besttrip.extensions.showLoading
 
-class LandingActivity : AppCompatActivity() {
-    var abc = 0
+class LandingActivity : DaggerAppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landing)
-        Thread({
-            Thread.sleep(1000)
-            abc = 1
-        }
-        ).start()
-        Handler().postDelayed({
-            Log.d("LandingActivity", abc.toString())
-        },10000)
 
         clContainer.post {
             ConstraintSet().apply {
@@ -46,8 +35,6 @@ class LandingActivity : AppCompatActivity() {
         super.onResume()
 
         showLoading()
-        Handler().postDelayed({
-            hideLoading()
-        },1000)
+        delay(2000, { hideLoading() })
     }
 }

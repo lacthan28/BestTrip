@@ -3,6 +3,7 @@ package sg.vinova.besttrip.extensions
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.os.Handler
 import android.support.v4.content.ContextCompat
 import android.view.inputmethod.InputMethodManager
 import org.jetbrains.anko.startActivity
@@ -17,15 +18,12 @@ const val LOADING_TAG = "ProgressDialogFragment"
 inline fun <reified T : Activity> T.isLogin() = BesttripApp.instance.currentUser != null
 
 inline fun <reified T : Activity> T.finishWithLogout() {
-    BesttripApp.instance.firebaseAuth?.signOut()
+    BesttripApp.instance.firebaseAuth.signOut()
     finish()
 }
 
 fun Activity.delay(duration: Long, init: () -> Unit) {
-    runOnUiThread {
-        Thread.sleep(duration)
-        init()
-    }
+    Handler().postDelayed({ init() }, duration)
 }
 
 inline fun <reified T : Activity> Activity.startActivityWithAnimForResult(requestCode: Int, isFinish: Boolean = true) {

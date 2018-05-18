@@ -7,9 +7,9 @@ import android.os.Bundle
 import android.support.constraint.ConstraintSet
 import android.support.constraint.ConstraintSet.BOTTOM
 import android.support.constraint.ConstraintSet.TOP
-import android.support.v7.app.AppCompatActivity
 import android.transition.AutoTransition
 import android.transition.TransitionManager
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_auth.*
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.toast
@@ -21,7 +21,7 @@ import sg.vinova.besttrip.features.auth.forgot.ForgotActivity
 import sg.vinova.besttrip.features.home.LandingActivity
 
 
-class AuthActivity : AppCompatActivity() {
+class AuthActivity : DaggerAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isLogin()) {
@@ -141,7 +141,7 @@ class AuthActivity : AppCompatActivity() {
 
     private fun prepaidLogoAnimations() {
         clContainer.post {
-            ConstraintSet().apply {
+            with(ConstraintSet()) {
                 clone(clContainer)
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                     setGuidelinePercent(R.id.glTop, 0.05f)
@@ -156,7 +156,7 @@ class AuthActivity : AppCompatActivity() {
 
     private fun prepaidLoginView() {
         clContainer.post {
-            ConstraintSet().apply {
+            with(ConstraintSet()) {
                 clone(clContainer)
 
                 clear(R.id.edtEmail, TOP)
@@ -192,7 +192,7 @@ class AuthActivity : AppCompatActivity() {
 
     private fun prepaidSignUpView() {
         clContainer.post {
-            ConstraintSet().apply {
+            with(ConstraintSet()) {
                 clone(clContainer)
 
                 clear(R.id.edtEmail, TOP)
