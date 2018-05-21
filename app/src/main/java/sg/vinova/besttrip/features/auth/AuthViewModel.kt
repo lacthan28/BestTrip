@@ -14,8 +14,9 @@ class AuthViewModel(repo: AuthRepository) : ViewModel() {
     val signUpWithEmail: LiveData<AuthResult>
     val error = MutableLiveData<Throwable>()
 
-    fun setEmailPassword(email: String, password: String) {
+    fun setEmailPassword(email: String, password: String): AuthViewModel {
         mUser.value = Pair(email, password)
+        return this
     }
 
     init {
@@ -28,9 +29,9 @@ class AuthViewModel(repo: AuthRepository) : ViewModel() {
         })
 
         signUpWithEmail = Transformations.switchMap<Pair<String, String>, AuthResult>(mUser, {
-            if (it == null){
+            if (it == null) {
                 AbsentLiveData.create()
-            } else{
+            } else {
                 repo.signUp(it, error)
             }
         })

@@ -12,8 +12,9 @@ class ForgotViewModel(repo: AuthRepository) : ViewModel() {
     val error = MutableLiveData<Throwable>()
     val forgotPassword: LiveData<Void>
 
-    fun setEmail(email: String) {
+    fun setEmail(email: String): ForgotViewModel {
         emailLiveData.value = email
+        return this
     }
 
     init {

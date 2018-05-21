@@ -17,27 +17,26 @@ import sg.vinova.besttrip.repositories.AuthRepositoryImpl
 
 
 class ForgotActivity : DaggerAppCompatActivity() {
-    val forgotViewModel: ForgotViewModel by lazy { createForgotViewModel() }
+    private val forgotViewModel: ForgotViewModel by lazy { createForgotViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot)
 
         actionBar?.setDisplayHomeAsUpEnabled(true)
-        title = getString(R.string.forgot_password_2)
+        title = getString(R.string.forgot_password_2) ?: ""
 
         setOnClickListener()
     }
 
     private fun setOnClickListener() {
-        tvSendForgot.setOnClickListener {
-            val email = edtForgotEmail.text.toString()
+        tvSendForgot?.setOnClickListener {
+            val email = edtForgotEmail?.text?.toString()?:""
             when {
-                email.isEmpty() -> edtForgotEmail.error = "Please input your email!"
-                email.invalidEmail() -> edtForgotEmail.error = "Invalid email!"
+                email.isEmpty() -> edtForgotEmail?.error = "Please input your email!"
+                email.invalidEmail() -> edtForgotEmail?.error = "Invalid email!"
                 else -> {
-                    forgotViewModel.setEmail(email)
-                    forgotViewModel.forgotPassword.observe(this, Observer {
+                    forgotViewModel.setEmail(email).forgotPassword.observe(this, Observer {
                         if (it == null) return@Observer
                         setResult(Activity.RESULT_OK, Intent().apply { putExtra("email", email) })
                         finish()

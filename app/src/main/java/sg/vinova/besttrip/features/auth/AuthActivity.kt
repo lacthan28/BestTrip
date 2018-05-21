@@ -60,9 +60,10 @@ class AuthActivity : DaggerAppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         outState?.apply {
-            putSerializable("menuState", if (!tvLogin.isClickable) LoginState.Login else LoginState.SignUp)
-            if (edtUsername.isVisible()) putString("username", edtUsername.text.toString())
-            putString("email", edtEmail.text.toString())
+            putSerializable("menuState", if (tvLogin?.isClickable
+                            ?: return) LoginState.SignUp else LoginState.Login)
+            if (edtUsername.isVisible()) putString("username", edtUsername?.text?.toString() ?: "")
+            putString("email", edtEmail?.text?.toString() ?: "")
         }
     }
 
@@ -71,60 +72,61 @@ class AuthActivity : DaggerAppCompatActivity() {
     }
 
     private fun setOnClickListener() {
-        edtPassword.afterTextChange {
-            if (it.length in 1..6) edtPassword.error = "Your password should have 6 characters or longer."
-            if (it.isNotEmpty() && (it.contains(edtUsername.text)
-                            || edtUsername.text.contains(it)
-                            || edtEmail.text.contains(it)))
-                edtPassword.error = "Your password can not be the same as username or email. Please choose a different password."
+        edtPassword?.afterTextChange {
+            if (it.length in 1..6) edtPassword?.error = "Your password should have 6 characters or longer."
+            if (it.isNotEmpty() && (edtUsername?.text ?: "" in it
+                            || it in edtUsername?.text ?: ""
+                            || it in edtEmail?.text ?: ""))
+                edtPassword?.error = "Your password can not be the same as username or email. Please choose a different password."
         }
 
-        edtPasswordConfirm.afterTextChange {
-            if (it.isNotEmpty() && it != edtPassword.text.toString())
-                edtPasswordConfirm.error = "Your passwords don't match. Please retype your password to confirm it."
+        edtPasswordConfirm?.afterTextChange {
+            if (it.isNotEmpty() && it != edtPassword?.text?.toString() ?: "")
+                edtPasswordConfirm?.error = "Your passwords don't match. Please retype your password to confirm it."
         }
 
-        tvSignUp.setOnClickListener {
+        tvSignUp?.setOnClickListener {
             prepaidSignUpView()
-            edtUsername.setText("")
+            edtUsername?.setText("")
         }
-        tvLogin.setOnClickListener {
+        tvLogin?.setOnClickListener {
             prepaidLoginView()
         }
-        tvSkip.setOnClickListener {
+        tvSkip?.setOnClickListener {
             startActivityWithAnim<LandingActivity>()
         }
-        tvForgot.setOnClickListener {
+        tvForgot?.setOnClickListener {
             startActivityWithAnimForResult<ForgotActivity>(requestCode = ACTIVITY_FORGOT, isFinish = false)
         }
-        btnEmailLogin.setOnClickListener {
+        btnEmailLogin?.setOnClickListener {
+            showLoading()
             authViewModel.error.observe(this, Observer {
                 if (it == null) return@Observer
+                hideLoading()
                 longToast(it.localizedMessage)
             })
-            val email = edtEmail.text.toString()
-            val password = edtPassword.text.toString()
-            if (btnEmailLogin.text.contains("Login")) {
+            val email = edtEmail?.text?.toString() ?: ""
+            val password = edtPassword?.text?.toString() ?: ""
+            if ("Login" in btnEmailLogin?.text ?: "") {
                 if (isValidData(email = email, password = password)) {
-                    showLoading()
                     authViewModel.setEmailPassword(email, password)
-                    authViewModel.loginWithEmail.observe(this, Observer {
+                            .loginWithEmail.observe(this, Observer {
                         if (it == null) return@Observer
                         hideLoading()
                         startActivityWithAnim<LandingActivity>()
                     })
                 }
             } else {
-                val username = edtUsername.text.toString()
-                val confirmPassword = edtPasswordConfirm.text.toString()
+                val username = edtUsername?.text?.toString() ?: ""
+                val confirmPassword = edtPasswordConfirm?.text?.toString() ?: ""
                 if (isValidData(username, email, password, confirmPassword)) {
                     authViewModel.setEmailPassword(email, password)
-                    authViewModel.signUpWithEmail.observe(this, Observer {
+                            .signUpWithEmail.observe(this, Observer {
                         if (it == null) return@Observer
-                        hideLoading()
                         it.user.updateProfile(UserProfileChangeRequest.Builder()
-                                .setDisplayName(edtUsername.text.toString())
+                                .setDisplayName(username)
                                 .build())
+                        hideLoading()
                         startActivityWithAnim<LandingActivity>()
                     })
                 }
@@ -134,25 +136,25 @@ class AuthActivity : DaggerAppCompatActivity() {
 
     private fun isValidData(username: String? = null, email: String, password: String, confirmPassword: String? = null): Boolean {
         if (username.isNotNullAndIsEmpty()) {
-            edtUsername.error = "Username is empty"
+            edtUsername?.error = "Username is empty"
             return false
         }
 
         if (email.isEmpty()) {
-            edtEmail.error = "Email is empty"
+            edtEmail?.error = "Email is empty"
             return false
         } else if (email.invalidEmail()) {
-            edtEmail.error = "Your email is not in the correct format"
+            edtEmail?.error = "Your email is not in the correct format"
             return false
         }
 
         if (password.isEmpty()) {
-            edtPassword.error = "Password is empty"
+            edtPassword?.error = "Password is empty"
             return false
         }
 
         if (confirmPassword.isNotNullAndIsEmpty()) {
-            edtPasswordConfirm.error = "Your confirm password is empty"
+            edtPasswordConfirm?.error = "Your confirm password is empty"
             return false
         }
         return true
@@ -160,11 +162,11 @@ class AuthActivity : DaggerAppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == ACTIVITY_FORGOT)
-            edtEmail.setText(data?.getStringExtra("email") ?: "")
+            edtEmail?.setText(data?.getStringExtra("email") ?: "")
     }
 
     private fun prepaidLogoAnimations() {
-        clContainer.post {
+        clContainer?.post {
             with(ConstraintSet()) {
                 clone(clContainer)
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
@@ -179,7 +181,7 @@ class AuthActivity : DaggerAppCompatActivity() {
     }
 
     private fun prepaidLoginView() {
-        clContainer.post {
+        clContainer?.post {
             with(ConstraintSet()) {
                 clone(clContainer)
 
@@ -187,10 +189,10 @@ class AuthActivity : DaggerAppCompatActivity() {
                 connect(R.id.edtEmail, TOP, R.id.tvLogin, BOTTOM)
                 clear(R.id.btnFbLogin, TOP)
                 connect(R.id.btnFbLogin, TOP, R.id.edtPassword, BOTTOM)
-                btnFbLogin.layoutParams = btnFbLogin.layoutParams.apply { setMargin(R.id.btnFbLogin, TOP, dip(16)) }
+                btnFbLogin?.layoutParams = btnFbLogin.layoutParams.apply { setMargin(R.id.btnFbLogin, TOP, dip(16)) }
 
-                groupHide.referencedIds = intArrayOf(R.id.edtUsername, R.id.line, R.id.line2, R.id.edtPasswordConfirm)
-                groupShow.referencedIds = intArrayOf(R.id.background, R.id.tvLogin, R.id.tvSignUp, R.id.tvForgot,
+                groupHide?.referencedIds = intArrayOf(R.id.edtUsername, R.id.line, R.id.line2, R.id.edtPasswordConfirm)
+                groupShow?.referencedIds = intArrayOf(R.id.background, R.id.tvLogin, R.id.tvSignUp, R.id.tvForgot,
                         R.id.edtEmail, R.id.line1, R.id.edtPassword, R.id.btnFbLogin, R.id.btnEmailLogin, R.id.tvSkip)
 
                 TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
@@ -199,23 +201,23 @@ class AuthActivity : DaggerAppCompatActivity() {
                 applyTo(clContainer)
             }
 
-            tvLogin.isClickable = false
-            tvLogin.setTextColor(Color.WHITE)
+            tvLogin?.isClickable = false
+            tvLogin?.setTextColor(Color.WHITE)
 
-            tvSignUp.isClickable = true
-            tvSignUp.setTextColor(Color.DKGRAY)
+            tvSignUp?.isClickable = true
+            tvSignUp?.setTextColor(Color.DKGRAY)
 
-            edtEmail.setBackgroundResource(R.drawable.bg_white_radius_top)
-            edtPassword.setBackgroundResource(R.drawable.bg_white_radius_bottom)
+            edtEmail?.setBackgroundResource(R.drawable.bg_white_radius_top)
+            edtPassword?.setBackgroundResource(R.drawable.bg_white_radius_bottom)
 
-            btnEmailLogin.text = getString(R.string.login_with_email)
+            btnEmailLogin?.text = getString(R.string.login_with_email)
 
-            edtPassword.setText("")
+            edtPassword?.setText("")
         }
     }
 
     private fun prepaidSignUpView() {
-        clContainer.post {
+        clContainer?.post {
             with(ConstraintSet()) {
                 clone(clContainer)
 
@@ -223,10 +225,10 @@ class AuthActivity : DaggerAppCompatActivity() {
                 connect(R.id.edtEmail, TOP, R.id.line, BOTTOM)
                 clear(R.id.btnFbLogin, TOP)
                 connect(R.id.btnFbLogin, TOP, R.id.edtPasswordConfirm, BOTTOM)
-                btnFbLogin.layoutParams = btnFbLogin.layoutParams.apply { setMargin(R.id.btnFbLogin, TOP, dip(16)) }
+                btnFbLogin?.layoutParams = btnFbLogin?.layoutParams.apply { setMargin(R.id.btnFbLogin, TOP, dip(16)) }
 
-                groupHide.referencedIds = intArrayOf(R.id.tvForgot)
-                groupShow.referencedIds = intArrayOf(R.id.background, R.id.tvLogin, R.id.tvSignUp,
+                groupHide?.referencedIds = intArrayOf(R.id.tvForgot)
+                groupShow?.referencedIds = intArrayOf(R.id.background, R.id.tvLogin, R.id.tvSignUp,
                         R.id.edtEmail, R.id.line1, R.id.edtPassword, R.id.edtUsername, R.id.line,
                         R.id.line2, R.id.edtPasswordConfirm, R.id.btnFbLogin, R.id.btnEmailLogin, R.id.tvSkip)
 
@@ -235,19 +237,19 @@ class AuthActivity : DaggerAppCompatActivity() {
                 })
                 applyTo(clContainer)
             }
-            tvSignUp.isClickable = false
-            tvSignUp.setTextColor(Color.WHITE)
+            tvSignUp?.isClickable = false
+            tvSignUp?.setTextColor(Color.WHITE)
 
-            tvLogin.isClickable = true
-            tvLogin.setTextColor(Color.DKGRAY)
+            tvLogin?.isClickable = true
+            tvLogin?.setTextColor(Color.DKGRAY)
 
-            edtEmail.setBackgroundColor(Color.WHITE)
-            edtPassword.setBackgroundColor(Color.WHITE)
+            edtEmail?.setBackgroundColor(Color.WHITE)
+            edtPassword?.setBackgroundColor(Color.WHITE)
 
-            btnEmailLogin.text = getString(R.string.sign_up_with_email)
+            btnEmailLogin?.text = getString(R.string.sign_up_with_email)
 
-            edtPassword.setText("")
-            edtPasswordConfirm.setText("")
+            edtPassword?.setText("")
+            edtPasswordConfirm?.setText("")
         }
     }
 

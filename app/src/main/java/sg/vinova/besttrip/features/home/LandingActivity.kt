@@ -17,7 +17,7 @@ class LandingActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landing)
 
-        clContainer.post {
+        clContainer?.post {
             ConstraintSet().apply {
                 clone(clContainer)
                 setGuidelinePercent(R.id.glTop, if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 0.2f else 0.3f)
