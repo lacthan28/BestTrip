@@ -1,13 +1,11 @@
-package sg.vinova.besttrip.models
+package sg.vinova.besttrip.widgets
 
 import android.app.Dialog
 import android.app.DialogFragment
 import android.app.FragmentManager
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.KeyEvent
 import org.jetbrains.anko.act
 import sg.vinova.besttrip.R
 import sg.vinova.besttrip.extensions.LOADING_TAG
@@ -30,7 +28,7 @@ class ProgressDialogFragment : DialogFragment() {
         }
 
         fun hide(fm: FragmentManager) {
-            val fragment = fm.findFragmentByTag(LOADING_TAG) as DialogFragment?
+            val fragment = fm.findFragmentByTag(LOADING_TAG) as? DialogFragment
             if (fragment != null) fm.beginTransaction().remove(fragment).commit()
         }
 

@@ -1,16 +1,23 @@
 package sg.vinova.besttrip.features.auth.forgot
 
 import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_forgot.*
+import org.jetbrains.anko.toast
 import sg.vinova.besttrip.R
 import sg.vinova.besttrip.extensions.invalidEmail
+import sg.vinova.besttrip.repositories.AuthRepositoryImpl
 
 
 class ForgotActivity : DaggerAppCompatActivity() {
+    val forgotViewModel: ForgotViewModel by lazy { createForgotViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,9 +36,15 @@ class ForgotActivity : DaggerAppCompatActivity() {
                 email.isEmpty() -> edtForgotEmail.error = "Please input your email!"
                 email.invalidEmail() -> edtForgotEmail.error = "Invalid email!"
                 else -> {
-                    //todo(If call api to send email reset pass success)
-                    setResult(Activity.RESULT_OK, Intent().apply { putExtra("email", email) })
-                    finish()
+                    forgotViewModel.setEmail(email)
+                    forgotViewModel.forgotPassword.observe(this, Observer {
+                        if (it == null) return@Observer
+                        setResult(Activity.RESULT_OK, Intent().apply { putExtra("email", email) })
+                        finish()
+                    })
+                    forgotViewModel.error.observe(this, Observer {
+                        toast(it?.localizedMessage ?: "UNKNOWN ERROR")
+                    })
                 }
             }
         }
@@ -46,4 +59,11 @@ class ForgotActivity : DaggerAppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+
+    private fun createForgotViewModel(): ForgotViewModel = ViewModelProviders.of(this, object : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return ForgotViewModel(AuthRepositoryImpl()) as T
+        }
+    })[ForgotViewModel::class.java]
 }
