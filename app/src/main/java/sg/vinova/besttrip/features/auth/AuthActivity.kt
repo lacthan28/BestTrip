@@ -44,12 +44,12 @@ class AuthActivity : DaggerAppCompatActivity() {
         when (savedInstanceState?.get("menuState")) {
             LoginState.Login -> {
                 prepaidLoginView()
-                edtEmail.setText(savedInstanceState.getString("email"))
+                edtEmail?.setText(savedInstanceState.getString("email"))
             }
             LoginState.SignUp -> {
                 prepaidSignUpView()
-                edtUsername.setText(savedInstanceState.getString("username"))
-                edtEmail.setText(savedInstanceState.getString("email"))
+                edtUsername?.setText(savedInstanceState.getString("username"))
+                edtEmail?.setText(savedInstanceState.getString("email"))
             }
             else -> prepaidLoginView()
         }
@@ -61,7 +61,7 @@ class AuthActivity : DaggerAppCompatActivity() {
         super.onSaveInstanceState(outState)
         outState?.apply {
             putSerializable("menuState", if (tvLogin?.isClickable
-                            ?: return) LoginState.SignUp else LoginState.Login)
+                            ?: return) LoginState.Login else LoginState.SignUp)
             if (edtUsername.isVisible()) putString("username", edtUsername?.text?.toString() ?: "")
             putString("email", edtEmail?.text?.toString() ?: "")
         }
@@ -87,7 +87,7 @@ class AuthActivity : DaggerAppCompatActivity() {
 
         tvSignUp?.setOnClickListener {
             prepaidSignUpView()
-            edtUsername?.setText("")
+            clearText(edtUsername)
         }
         tvLogin?.setOnClickListener {
             prepaidLoginView()
@@ -107,28 +107,31 @@ class AuthActivity : DaggerAppCompatActivity() {
             })
             val email = edtEmail?.text?.toString() ?: ""
             val password = edtPassword?.text?.toString() ?: ""
-            if ("Login" in btnEmailLogin?.text ?: "") {
-                if (isValidData(email = email, password = password)) {
-                    authViewModel.setEmailPassword(email, password)
-                            .loginWithEmail.observe(this, Observer {
-                        if (it == null) return@Observer
-                        hideLoading()
-                        startActivityWithAnim<LandingActivity>()
-                    })
+            when (btnEmailLogin?.text ?: "") {
+                "Login" -> {
+                    if (isValidData(email = email, password = password)) {
+                        authViewModel.setEmailPassword(email, password)
+                                .loginWithEmail.observe(this, Observer {
+                            if (it == null) return@Observer
+                            hideLoading()
+                            startActivityWithAnim<LandingActivity>()
+                        })
+                    }
                 }
-            } else {
-                val username = edtUsername?.text?.toString() ?: ""
-                val confirmPassword = edtPasswordConfirm?.text?.toString() ?: ""
-                if (isValidData(username, email, password, confirmPassword)) {
-                    authViewModel.setEmailPassword(email, password)
-                            .signUpWithEmail.observe(this, Observer {
-                        if (it == null) return@Observer
-                        it.user.updateProfile(UserProfileChangeRequest.Builder()
-                                .setDisplayName(username)
-                                .build())
-                        hideLoading()
-                        startActivityWithAnim<LandingActivity>()
-                    })
+                "Sign up" -> {
+                    val username = edtUsername?.text?.toString() ?: ""
+                    val confirmPassword = edtPasswordConfirm?.text?.toString() ?: ""
+                    if (isValidData(username, email, password, confirmPassword)) {
+                        authViewModel.setEmailPassword(email, password)
+                                .signUpWithEmail.observe(this, Observer {
+                            if (it == null) return@Observer
+                            it.user.updateProfile(UserProfileChangeRequest.Builder()
+                                    .setDisplayName(username)
+                                    .build())
+                            hideLoading()
+                            startActivityWithAnim<LandingActivity>()
+                        })
+                    }
                 }
             }
         }
@@ -201,18 +204,15 @@ class AuthActivity : DaggerAppCompatActivity() {
                 applyTo(clContainer)
             }
 
-            tvLogin?.isClickable = false
-            tvLogin?.setTextColor(Color.WHITE)
-
-            tvSignUp?.isClickable = true
-            tvSignUp?.setTextColor(Color.DKGRAY)
+            tvSignUp?.enableClick(true)
+            tvLogin?.enableClick(false)
 
             edtEmail?.setBackgroundResource(R.drawable.bg_white_radius_top)
             edtPassword?.setBackgroundResource(R.drawable.bg_white_radius_bottom)
 
             btnEmailLogin?.text = getString(R.string.login_with_email)
 
-            edtPassword?.setText("")
+            clearText(edtPassword)
         }
     }
 
@@ -237,19 +237,15 @@ class AuthActivity : DaggerAppCompatActivity() {
                 })
                 applyTo(clContainer)
             }
-            tvSignUp?.isClickable = false
-            tvSignUp?.setTextColor(Color.WHITE)
-
-            tvLogin?.isClickable = true
-            tvLogin?.setTextColor(Color.DKGRAY)
+            tvSignUp?.enableClick(false)
+            tvLogin?.enableClick(true)
 
             edtEmail?.setBackgroundColor(Color.WHITE)
             edtPassword?.setBackgroundColor(Color.WHITE)
 
             btnEmailLogin?.text = getString(R.string.sign_up_with_email)
 
-            edtPassword?.setText("")
-            edtPasswordConfirm?.setText("")
+            clearText(edtPassword, edtPasswordConfirm)
         }
     }
 

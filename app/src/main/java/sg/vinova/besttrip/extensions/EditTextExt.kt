@@ -1,5 +1,6 @@
 package sg.vinova.besttrip.extensions
 
+import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -38,4 +39,10 @@ fun EditText.onTextChange(init: (String) -> Unit) {
             }
 
         })
+}
+
+fun Context.clearText(vararg views: EditText?) {
+    views.filterNotNull().forEach {
+        it.setText("")
+    }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Binds
@@ -30,5 +31,12 @@ abstract class AppModule {
         fun provideGGClient(app: BesttripApp): GoogleApiClient = GoogleApiClient.Builder(app)
                 .addApi(LocationServices.API)
                 .build()
+
+        @Provides
+        fun provideLocationRequest(): LocationRequest = LocationRequest.create().apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
     }
 }
