@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintSet
@@ -13,12 +12,11 @@ import android.support.constraint.ConstraintSet.BOTTOM
 import android.support.constraint.ConstraintSet.TOP
 import android.transition.AutoTransition
 import android.transition.TransitionManager
-import com.google.firebase.auth.UserProfileChangeRequest
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_auth.*
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.longToast
-import sg.vinova.besttrip.ACTIVITY_FORGOT
+import sg.vinova.besttrip.ACTIVITY_FORGOT_REQUEST_CODE
 import sg.vinova.besttrip.LoginState
 import sg.vinova.besttrip.R
 import sg.vinova.besttrip.extensions.*
@@ -29,11 +27,12 @@ import sg.vinova.besttrip.repositories.AuthRepositoryImpl
 
 class AuthActivity : DaggerAppCompatActivity() {
     private val authViewModel: AuthViewModel by lazy { providerAuthViewModel() }
+    private var email: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isLogin()) {
-            startActivityWithAnim<LandingActivity>()
+            startActivityWithAnim<LandingActivity>(true)
         }
 
         setContentView(R.layout.activity_auth)
@@ -44,17 +43,38 @@ class AuthActivity : DaggerAppCompatActivity() {
         when (savedInstanceState?.get("menuState")) {
             LoginState.Login -> {
                 prepaidLoginView()
-                edtEmail?.setText(savedInstanceState.getString("email"))
+                email = savedInstanceState.getString("email")
             }
             LoginState.SignUp -> {
                 prepaidSignUpView()
                 edtUsername?.setText(savedInstanceState.getString("username"))
-                edtEmail?.setText(savedInstanceState.getString("email"))
+                email = savedInstanceState.getString("email")
             }
             else -> prepaidLoginView()
         }
 
+        if (email.isNotEmpty()) edtEmail?.setText(email)
+
         setOnClickListener()
+
+        authViewModel.loginWithEmail.observe(this, Observer {
+            if (it == null) return@Observer
+            hideLoading()
+            startActivityWithAnim<LandingActivity>(true)
+        })
+
+        authViewModel.signUpWithEmail.observe(this, Observer {
+            if (it == null) return@Observer
+            hideLoading()
+            prepaidLoginView()
+        })
+
+        authViewModel.error.observe(this, Observer {
+            if (it == null) return@Observer
+            hideLoading()
+            it.printStackTrace()
+            longToast(it.localizedMessage)
+        })
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -73,16 +93,14 @@ class AuthActivity : DaggerAppCompatActivity() {
 
     private fun setOnClickListener() {
         edtPassword?.afterTextChange {
-            if (it.length in 1..6) edtPassword?.error = "Your password should have 6 characters or longer."
-            if (it.isNotEmpty() && (edtUsername?.text ?: "" in it
-                            || it in edtUsername?.text ?: ""
-                            || it in edtEmail?.text ?: ""))
-                edtPassword?.error = "Your password can not be the same as username or email. Please choose a different password."
+            if (it.length in 1..6) edtPassword?.error = getString(R.string.password_to_short)
+            if (it.isNotEmpty() && (edtUsername?.text ?: "" in it || it in edtUsername?.text ?: "" || it in edtEmail?.text ?: ""))
+                edtPassword?.error = getString(R.string.password_as_same_as_username_or_email)
         }
 
         edtPasswordConfirm?.afterTextChange {
             if (it.isNotEmpty() && it != edtPassword?.text?.toString() ?: "")
-                edtPasswordConfirm?.error = "Your passwords don't match. Please retype your password to confirm it."
+                edtPasswordConfirm?.error = getString(R.string.password_not_match)
         }
 
         tvSignUp?.setOnClickListener {
@@ -93,44 +111,25 @@ class AuthActivity : DaggerAppCompatActivity() {
             prepaidLoginView()
         }
         tvSkip?.setOnClickListener {
-            startActivityWithAnim<LandingActivity>()
+            startActivityWithAnim<LandingActivity>(true)
         }
         tvForgot?.setOnClickListener {
-            startActivityWithAnimForResult<ForgotActivity>(requestCode = ACTIVITY_FORGOT, isFinish = false)
+            startActivityWithAnimForResult<ForgotActivity>(requestCode = ACTIVITY_FORGOT_REQUEST_CODE, isFinish = false)
         }
         btnEmailLogin?.setOnClickListener {
             showLoading()
-            authViewModel.error.observe(this, Observer {
-                if (it == null) return@Observer
-                hideLoading()
-                longToast(it.localizedMessage)
-            })
-            val email = edtEmail?.text?.toString() ?: ""
+            email = edtEmail?.text?.toString() ?: ""
             val password = edtPassword?.text?.toString() ?: ""
-            when (btnEmailLogin?.text ?: "") {
-                "Login" -> {
-                    if (isValidData(email = email, password = password)) {
-                        authViewModel.setEmailPassword(email, password)
-                                .loginWithEmail.observe(this, Observer {
-                            if (it == null) return@Observer
-                            hideLoading()
-                            startActivityWithAnim<LandingActivity>()
-                        })
-                    }
+
+            when (tvSignUp.isClickable) {
+                true -> if (isValidData(email = email, password = password)) {
+                    authViewModel.setLogin(email, password)
                 }
-                "Sign up" -> {
+                false -> {
                     val username = edtUsername?.text?.toString() ?: ""
                     val confirmPassword = edtPasswordConfirm?.text?.toString() ?: ""
                     if (isValidData(username, email, password, confirmPassword)) {
-                        authViewModel.setEmailPassword(email, password)
-                                .signUpWithEmail.observe(this, Observer {
-                            if (it == null) return@Observer
-                            it.user.updateProfile(UserProfileChangeRequest.Builder()
-                                    .setDisplayName(username)
-                                    .build())
-                            hideLoading()
-                            startActivityWithAnim<LandingActivity>()
-                        })
+                        authViewModel.setSignUp(username, email, password)
                     }
                 }
             }
@@ -138,33 +137,39 @@ class AuthActivity : DaggerAppCompatActivity() {
     }
 
     private fun isValidData(username: String? = null, email: String, password: String, confirmPassword: String? = null): Boolean {
+        // Check username
         if (username.isNotNullAndIsEmpty()) {
-            edtUsername?.error = "Username is empty"
+            edtUsername?.error = getString(R.string.empty_field, "Username")
             return false
         }
 
+        // Check email
         if (email.isEmpty()) {
-            edtEmail?.error = "Email is empty"
+            edtEmail?.error = getString(R.string.empty_field, "Email")
             return false
         } else if (email.invalidEmail()) {
-            edtEmail?.error = "Your email is not in the correct format"
+            edtEmail?.error = getString(R.string.email_incorrect_format)
             return false
         }
 
+        // Check password
         if (password.isEmpty()) {
-            edtPassword?.error = "Password is empty"
+            edtPassword?.error = getString(R.string.empty_field, "Password")
             return false
         }
 
+        // Check confirm password
         if (confirmPassword.isNotNullAndIsEmpty()) {
-            edtPasswordConfirm?.error = "Your confirm password is empty"
+            edtPasswordConfirm?.error = getString(R.string.empty_field, "Confirm password")
             return false
         }
+
+        // All valid
         return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == ACTIVITY_FORGOT)
+        if (requestCode == ACTIVITY_FORGOT_REQUEST_CODE)
             edtEmail?.setText(data?.getStringExtra("email") ?: "")
     }
 
@@ -172,12 +177,8 @@ class AuthActivity : DaggerAppCompatActivity() {
         clContainer?.post {
             with(ConstraintSet()) {
                 clone(clContainer)
-                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    setGuidelinePercent(R.id.glTop, 0.05f)
-                else setGuidelinePercent(R.id.glTop, 0.15f)
-                TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
-                    duration = 1500
-                })
+                setGuidelinePercent(R.id.glTop, if (isLandscape()) 0.05f else 0.15f)
+                TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply { duration = 1500 })
                 applyTo(clContainer)
             }
         }
@@ -198,9 +199,7 @@ class AuthActivity : DaggerAppCompatActivity() {
                 groupShow?.referencedIds = intArrayOf(R.id.background, R.id.tvLogin, R.id.tvSignUp, R.id.tvForgot,
                         R.id.edtEmail, R.id.line1, R.id.edtPassword, R.id.btnFbLogin, R.id.btnEmailLogin, R.id.tvSkip)
 
-                TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
-                    duration = 500
-                })
+                TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply { duration = 500 })
                 applyTo(clContainer)
             }
 
@@ -232,9 +231,7 @@ class AuthActivity : DaggerAppCompatActivity() {
                         R.id.edtEmail, R.id.line1, R.id.edtPassword, R.id.edtUsername, R.id.line,
                         R.id.line2, R.id.edtPasswordConfirm, R.id.btnFbLogin, R.id.btnEmailLogin, R.id.tvSkip)
 
-                TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply {
-                    duration = 500
-                })
+                TransitionManager.beginDelayedTransition(clContainer, AutoTransition().apply { duration = 500 })
                 applyTo(clContainer)
             }
             tvSignUp?.enableClick(false)

@@ -1,42 +1,37 @@
 package sg.vinova.besttrip.dagger.module
 
-import android.content.Context
+import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import sg.vinova.besttrip.BesttripApp
-import javax.inject.Singleton
+
 
 @Module
-abstract class AppModule {
-    @Binds
-    abstract fun bindContext(app: BesttripApp): Context
-
+class AppModule {
     @Module
-    companion object {
-        @Provides
-        fun provideMainHandler(): Handler = Handler(Looper.getMainLooper())
+    interface ApplicationDeclarations {
+        @Binds
+        fun provideApplication(app: BesttripApp): Application
+    }
 
-        @Provides
-        fun provideFirebaseAuthInstance(): FirebaseAuth = FirebaseAuth.getInstance()
+    @Provides
+    fun provideMainHandler(): Handler = Handler(Looper.getMainLooper())
 
-        @Provides
-        @Singleton
-        fun provideGGClient(app: BesttripApp): GoogleApiClient = GoogleApiClient.Builder(app)
-                .addApi(LocationServices.API)
-                .build()
+    @Provides
+    fun provideGoogleApiClient(context: BesttripApp): GoogleApiClient = GoogleApiClient.Builder(context)
+            .addApi(LocationServices.API)
+            .build()
 
-        @Provides
-        fun provideLocationRequest(): LocationRequest = LocationRequest.create().apply {
-            interval = 10000
-            fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
+    @Provides
+    fun provideLocationRequest(): LocationRequest = LocationRequest.create().apply {
+        interval = 10000
+        fastestInterval = 5000
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 }

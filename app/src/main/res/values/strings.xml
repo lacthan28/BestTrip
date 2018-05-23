@@ -19,4 +19,11 @@
     <string name="where_you_heading">Where you heading?</string>
     <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
     <string name="location_permission_denied">This sample requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.\nIf the permission has been permanently denied, it can be enabled from the System Settings &gt; Apps &gt; \'BestTrip\'.</string>
+
+    <!-- Error strings -->
+    <string name="password_as_same_as_username_or_email">Your password can not be the same as username or email. Please choose a different password.</string>
+    <string name="password_to_short">Your password should have 6 characters or longer.</string>
+    <string name="password_not_match">Your passwords don\'t match. Please retype your password to confirm it.</string>
+    <string name="empty_field">%1$s is empty!!!</string>
+    <string name="email_incorrect_format">Your email is not in the correct format</string>
 </resources>

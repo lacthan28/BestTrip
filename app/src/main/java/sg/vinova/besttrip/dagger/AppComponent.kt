@@ -7,12 +7,13 @@ import dagger.android.support.AndroidSupportInjectionModule
 import dagger.android.support.DaggerApplication
 import sg.vinova.besttrip.BesttripApp
 import sg.vinova.besttrip.dagger.module.ActivityContributorModule
+import sg.vinova.besttrip.dagger.module.ActivityModule
 import sg.vinova.besttrip.dagger.module.AppModule
 import javax.inject.Singleton
 
 @Singleton
 @Component(modules = [AndroidSupportInjectionModule::class, AppModule::class, ActivityContributorModule::class])
-interface AppComponent : AndroidInjector<DaggerApplication> {
+interface AppComponent : AndroidInjector<BesttripApp> {
     @Component.Builder
     interface Builder {
         @BindsInstance

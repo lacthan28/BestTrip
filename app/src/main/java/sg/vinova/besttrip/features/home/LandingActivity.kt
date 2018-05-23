@@ -2,7 +2,10 @@ package sg.vinova.besttrip.features.home
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.res.Configuration
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Looper
 import android.support.constraint.ConstraintSet
@@ -18,6 +21,8 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import sg.vinova.besttrip.R
 import sg.vinova.besttrip.extensions.*
+import sg.vinova.besttrip.features.searchlocation.SearchActivity
+import sg.vinova.besttrip.repositories.LocationRepositoryImpl
 import javax.inject.Inject
 
 const val LOCATION_PERMISSION_REQUEST_CODE = 240
@@ -30,11 +35,14 @@ class LandingActivity : DaggerAppCompatActivity(), GoogleApiClient.ConnectionCal
     @Inject
     lateinit var locationRequest: LocationRequest
 
+    private val landingViewModel: LandingViewModel by lazy { createLandingViewModel() }
+
     private val locationCallback: LocationCallback by lazy {
         object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult?) {
+                hideLoading()
                 p0?.locations?.filterNotNull()?.forEach {
-                    hideLoading()
+                    landingViewModel.setLocation(it)
                 }
             }
         }
@@ -47,14 +55,15 @@ class LandingActivity : DaggerAppCompatActivity(), GoogleApiClient.ConnectionCal
         clContainer?.post {
             ConstraintSet().apply {
                 clone(clContainer)
-                setGuidelinePercent(R.id.glTop, if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 0.2f else 0.3f)
+                setGuidelinePercent(R.id.glTop, if (isLandscape()) 0.2f else 0.3f)
                 applyTo(clContainer)
             }
         }
-
         requestLocationPermissions()
 
-        showLoading()
+        tvDestination?.setOnClickListener {
+            startActivityWithAnim<SearchActivity>()
+        }
     }
 
 
@@ -64,6 +73,7 @@ class LandingActivity : DaggerAppCompatActivity(), GoogleApiClient.ConnectionCal
 
         if (EasyPermissions.hasPermissions(this, *permissions)) {
             if (isPlayServicesAvailable()) {
+                showLoading()
                 googleApiClient.connect()
                 googleApiClient.registerConnectionCallbacks(this)
                 googleApiClient.registerConnectionFailedListener(this)
@@ -83,6 +93,11 @@ class LandingActivity : DaggerAppCompatActivity(), GoogleApiClient.ConnectionCal
 
     @SuppressLint("MissingPermission")
     override fun onConnected(p0: Bundle?) {
+        landingViewModel.getAddress.observe(this, Observer {
+            if (it.isNullOrEmpty()) return@Observer
+            hideLoading()
+            tvDeparture?.text = it
+        })
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
     }
 
@@ -93,4 +108,11 @@ class LandingActivity : DaggerAppCompatActivity(), GoogleApiClient.ConnectionCal
     override fun onConnectionFailed(p0: ConnectionResult) {
         error("${p0.errorCode} - ${p0.errorMessage ?: ""}")
     }
+
+    private fun createLandingViewModel(): LandingViewModel = ViewModelProviders.of(this, object : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return LandingViewModel(LocationRepositoryImpl()) as T
+        }
+    })[LandingViewModel::class.java]
 }

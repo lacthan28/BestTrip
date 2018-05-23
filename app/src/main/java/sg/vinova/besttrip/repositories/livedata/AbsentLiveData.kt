@@ -1,4 +1,4 @@
-package sg.vinova.besttrip.repositories.livedatas
+package sg.vinova.besttrip.repositories.livedata
 
 import android.arch.lifecycle.LiveData
 

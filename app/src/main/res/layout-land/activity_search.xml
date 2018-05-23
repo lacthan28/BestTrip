@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".features.searchlocation.SearchActivity">
+    android:layout_height="match_parent">
 
     <!-- Vertical guideline -->
 
@@ -13,14 +12,14 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.05" />
+        app:layout_constraintGuide_percent="0.15" />
 
     <android.support.constraint.Guideline
         android:id="@+id/glRight"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.95" />
+        app:layout_constraintGuide_percent="0.85" />
 
     <!-- View -->
 
@@ -36,8 +35,8 @@
         android:hint="@string/where_you_heading"
         android:inputType="text"
         android:padding="16dp"
-        app:layout_constraintEnd_toEndOf="@id/glRight"
-        app:layout_constraintStart_toStartOf="@id/glLeft"
+        app:layout_constraintEnd_toStartOf="@+id/glRight"
+        app:layout_constraintStart_toStartOf="@+id/glLeft"
         app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.RecyclerView
@@ -50,4 +49,5 @@
         app:layout_constraintStart_toStartOf="@+id/glLeft"
         app:layout_constraintTop_toBottomOf="@+id/edtSearch"
         tools:listitem="@layout/item_search_location" />
+
 </android.support.constraint.ConstraintLayout>

@@ -6,21 +6,26 @@ import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import com.google.firebase.auth.AuthResult
 import sg.vinova.besttrip.repositories.AuthRepository
-import sg.vinova.besttrip.repositories.livedatas.AbsentLiveData
+import sg.vinova.besttrip.repositories.livedata.AbsentLiveData
 
 class AuthViewModel(repo: AuthRepository) : ViewModel() {
-    private val mUser = MutableLiveData<Pair<String, String>?>()
+    private val mUserLogin = MutableLiveData<Pair<String, String>?>()
+    private val mUserSignUp = MutableLiveData<Triple<String, String, String>?>()
     val loginWithEmail: LiveData<AuthResult>
     val signUpWithEmail: LiveData<AuthResult>
+    val logout: LiveData<String>
     val error = MutableLiveData<Throwable>()
 
-    fun setEmailPassword(email: String, password: String): AuthViewModel {
-        mUser.value = Pair(email, password)
-        return this
+    fun setLogin(email: String, password: String) {
+        mUserLogin.value = Pair(email, password)
+    }
+
+    fun setSignUp(username:String, email: String, password: String) {
+        mUserSignUp.value = Triple(username, email, password)
     }
 
     init {
-        loginWithEmail = Transformations.switchMap<Pair<String, String>, AuthResult>(mUser, {
+        loginWithEmail = Transformations.switchMap<Pair<String, String>?, AuthResult>(mUserLogin, {
             if (it == null) {
                 AbsentLiveData.create()
             } else {
@@ -28,12 +33,14 @@ class AuthViewModel(repo: AuthRepository) : ViewModel() {
             }
         })
 
-        signUpWithEmail = Transformations.switchMap<Pair<String, String>, AuthResult>(mUser, {
+        signUpWithEmail = Transformations.switchMap<Triple<String, String, String>?, AuthResult>(mUserSignUp, {
             if (it == null) {
                 AbsentLiveData.create()
             } else {
                 repo.signUp(it, error)
             }
         })
+
+        logout = repo.logout()
     }
 }
