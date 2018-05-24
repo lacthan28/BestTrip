@@ -9,16 +9,47 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "sg.vinova.besttrip"
+        applicationId "com.github.besttrip"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("../app/keystore.jks")
+            storePassword "Linhdpp28"
+            keyAlias "besttrip"
+            keyPassword "Linhdpp28"
+        }
+    }
+
+    flavorDimensions "besttrip"
+    productFlavors {
+        prod {
+            dimension "besttrip"
+            applicationIdSuffix ".prod"
+            versionNameSuffix "-prod"
+        }
+        dev {
+            dimension "besttrip"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+        }
+    }
+
     buildTypes {
-        release {
+        debug {
+            signingConfig signingConfigs.debug
+            applicationIdSuffix ".debug"
             minifyEnabled false
+            debuggable true
+        }
+        release {
+            debuggable false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
