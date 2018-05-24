@@ -1,4 +1,4 @@
-package sg.vinova.besttrip;
+package com.github.besttrip;
 
 import android.util.Log;
 
